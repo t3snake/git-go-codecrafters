@@ -5,6 +5,7 @@ import (
 	"compress/zlib"
 	"fmt"
 	"os"
+	"io"
 )
 
 // Usage: your_program.sh <command> <arg1> <arg2> ...
@@ -16,6 +17,8 @@ func main() {
 		fmt.Fprintf(os.Stderr, "usage: mygit <command> [<args>...]\n")
 		os.Exit(1)
 	}
+	
+	fmt.Println(os.Args[1], os.Args[2], os.Args[3])
 
 	switch command := os.Args[1]; command {
 	case "init":
@@ -35,23 +38,24 @@ func main() {
 		fmt.Println("Initialized git directory")
 
 	case "cat-file":
-		fmt.Print(uncompressZlib(os.Args[3]))
+		uncompressZlib(os.Args[3])
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
 	}
 }
 
-func uncompressZlib(data string) string {
-	var buf bytes.Buffer
+func uncompressZlib(data string) {
+	data_bytes := []byte(data)
 
-	r, err := zlib.NewReader(&buf)
+	buf := bytes.NewReader(data_bytes)
+
+	r, err := zlib.NewReader(buf)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decompressing zlib")
 	}
 
-	r.Read([]byte(data))
-	r.Close()
+	io.Copy(os.Stdout, r)
 
-	return buf.String()
+	r.Close()
 }
