@@ -44,7 +44,7 @@ func main() {
 
 func uncompressZlib(data string) string {
 	var in bytes.Buffer
-	var out bytes.Buffer
+	var out []byte
 
 	in.WriteString(data)
 	r, err := zlib.NewReader(&in)
@@ -52,8 +52,8 @@ func uncompressZlib(data string) string {
 		fmt.Fprintf(os.Stderr, "Error decompressing zlib")
 	}
 
-	r.Read(out.Bytes())
+	r.Read(out)
 	r.Close()
 
-	return out.String()
+	return string(out)
 }
