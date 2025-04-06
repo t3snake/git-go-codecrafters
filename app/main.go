@@ -43,17 +43,15 @@ func main() {
 }
 
 func uncompressZlib(data string) string {
-	var in bytes.Buffer
-	var out bytes.Buffer
+	var buf bytes.Buffer
 
-	in.WriteString(data)
-	r, err := zlib.NewReader(&in)
+	r, err := zlib.NewReader(&buf)
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error decompressing zlib")
 	}
 
-	r.Read(out.Bytes())
+	r.Read([]byte(data))
 	r.Close()
 
-	return out.String()
+	return buf.String()
 }
