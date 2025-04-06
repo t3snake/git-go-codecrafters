@@ -1,6 +1,8 @@
 package main
 
 import (
+	"bytes"
+	"compress/zlib"
 	"fmt"
 	"os"
 )
@@ -32,8 +34,26 @@ func main() {
 
 		fmt.Println("Initialized git directory")
 
+	case "cat-file":
+		fmt.Print(uncompressZlib(os.Args[3]))
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
 	}
+}
+
+func uncompressZlib(data string) string {
+	var in bytes.Buffer
+	var out bytes.Buffer
+
+	in.WriteString(data)
+	r, err := zlib.NewReader(&in)
+	if err != nil {
+		fmt.Fprintf(os.Stderr, "Error decompressing zlib")
+	}
+
+	r.Read(out.Bytes())
+	r.Close()
+
+	return out.String()
 }
