@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"compress/zlib"
 	"fmt"
-	"io"
 	"os"
+	"strings"
 )
 
 // Usage: your_program.sh <command> <arg1> <arg2> ...
@@ -36,29 +36,45 @@ func main() {
 		fmt.Println("Initialized git directory")
 
 	case "cat-file":
-		uncompressZlib(os.Args[3])
+		content, err := uncompressZlib(os.Args[3])
+		if err != nil {
+			fmt.Fprint(os.Stderr, err.Error())
+		}
+		fmt.Print(content)
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
 		os.Exit(1)
 	}
 }
 
-func uncompressZlib(hash string) {
+func uncompressZlib(hash string) (string, error) {
 	file_name := ".git/objects/" + hash[0:2] + "/" + hash[2:]
 
 	file, err := os.ReadFile(file_name)
 	if err != nil {
-		fmt.Fprint(os.Stderr, err.Error())
+		return "", err
 	}
 
 	buf := bytes.NewReader(file)
 
 	r, err := zlib.NewReader(buf)
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "Error decompressing zlib file")
+		return "", err
 	}
 	defer r.Close()
 
-	io.Copy(os.Stdout, r)
+	var b bytes.Buffer
+	_, err = b.ReadFrom(r)
+	if err != nil {
+		return "", fmt.Errorf("error reading blob file: %s", err.Error())
+	}
+
+	blob := b.String()
+	if strings.Contains(blob, string(rune(0))) {
+		content := strings.Split(blob, string(rune(0)))[1]
+		return content, nil
+	} else {
+		return "", fmt.Errorf("invalid blob: doesnt contain null byte")
+	}
 
 }
