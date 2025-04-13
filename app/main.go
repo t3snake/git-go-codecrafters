@@ -103,7 +103,7 @@ func HashObject(filename string, write_flag bool) (string, error) {
 
 	blob := generateBlobObject(string(file_content))
 
-	sha := sha1.Sum([]byte(blob))
+	sha := fmt.Sprintf("%x", sha1.Sum([]byte(blob)))
 
 	if write_flag {
 		err = writeBlobObject(blob, sha)
@@ -112,8 +112,7 @@ func HashObject(filename string, write_flag bool) (string, error) {
 		}
 	}
 
-	// convert fixed byte array to byte slice using [:] before converting to string
-	return string(sha[:]), nil
+	return sha, nil
 }
 
 // generateBlobObject generates blob string and returns it
@@ -123,17 +122,23 @@ func generateBlobObject(content string) string {
 }
 
 // writeBlobObject writes a blob into .git directory
-func writeBlobObject(blob_content string, sha_hash [20]byte) error {
+func writeBlobObject(blob_content string, sha_hash string) error {
 	// ".git/objects/" + hash[0:2] + "/" + hash[2:]
-	object_path := fmt.Sprintf(".git/objects/%s/%s", string(sha_hash[:2]), string(sha_hash[2:]))
+	object_path := fmt.Sprintf(".git/objects/%s/%s", sha_hash[:2], sha_hash[2:])
+
+	// get new os.File which implements io.Writer
+	file, err := os.OpenFile(object_path, os.O_CREATE, 0644)
+	if err != nil {
+		return err
+	}
+	defer file.Close()
 
 	// compress blob with zlib
-	var b bytes.Buffer
-	w := zlib.NewWriter(&b)
+	w := zlib.NewWriter(file)
 	defer w.Close()
 
-	w.Write([]byte(blob_content))
+	_, err = w.Write([]byte(blob_content))
 
-	err := os.WriteFile(object_path, b.Bytes(), 0644)
+	// err := os.WriteFile(object_path, b.Bytes(), 0644)
 	return err
 }
