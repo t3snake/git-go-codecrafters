@@ -124,7 +124,10 @@ func generateBlobObject(content string) string {
 // writeBlobObject writes a blob into .git directory
 func writeBlobObject(blob_content string, sha_hash string) error {
 	// ".git/objects/" + hash[0:2] + "/" + hash[2:]
-	object_path := fmt.Sprintf(".git/objects/%s/%s", sha_hash[:2], sha_hash[2:])
+	directory_path := fmt.Sprintf(".git/objects/%s", sha_hash[:2])
+	object_path := fmt.Sprintf("%s/%s", directory_path, sha_hash[2:])
+
+	os.Mkdir(directory_path, 0755)
 
 	// get new os.File which implements io.Writer
 	file, err := os.OpenFile(object_path, os.O_CREATE, 0644)
