@@ -130,7 +130,7 @@ func writeBlobObject(blob_content string, sha_hash string) error {
 	os.Mkdir(directory_path, 0755)
 
 	// get new os.File which implements io.Writer
-	file, err := os.OpenFile(object_path, os.O_CREATE, 0644)
+	file, err := os.OpenFile(object_path, os.O_CREATE|os.O_WRONLY, 0644)
 	if err != nil {
 		return err
 	}
