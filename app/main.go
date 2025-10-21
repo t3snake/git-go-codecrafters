@@ -83,7 +83,7 @@ func main() {
 		if err != nil {
 			fmt.Fprint(os.Stderr, err.Error())
 		}
-		fmt.Println(content)
+		fmt.Print(content) // newline already added within implementation
 
 	default:
 		fmt.Fprintf(os.Stderr, "Unknown command %s\n", command)
