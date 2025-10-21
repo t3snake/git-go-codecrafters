@@ -118,7 +118,8 @@ func HashObject(filename string, write_flag bool) (string, error) {
 // generateBlobObject generates blob string and returns it
 func generateBlobObject(content string) string {
 	content_length := len(content)
-	return fmt.Sprintf("blob %d%s%s", content_length, string(rune(0)), content)
+	null_char := string(rune(0))
+	return fmt.Sprintf("blob %d%s%s", content_length, null_char, content)
 }
 
 // writeBlobObject writes a blob into .git directory
