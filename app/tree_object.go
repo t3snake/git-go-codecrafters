@@ -126,7 +126,7 @@ func WriteTree(path string) (string, [20]byte, error) {
 			tree_items = append(tree_items, TreeObjectItem{
 				name:     entry.Name(),
 				sha_byte: sha_byte,
-				mode:     DirectoryMode,
+				mode:     DirectoryMode[1:],
 			})
 			continue
 		}
