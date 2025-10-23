@@ -171,7 +171,7 @@ func WriteTree(path string) (string, [20]byte, error) {
 	content = fmt.Sprintf("%s%s", header, content)
 
 	// return sha of that content
-	sha_hex, sha_bytes := writeContentAndGetShaHexAndBytes(content)
+	sha_hex, sha_bytes := getShaHexAndBytesForContent(content)
 
 	// write zlib compressed content into .git folder
 	err := compressAndWriteGitObject(content, sha_hex)

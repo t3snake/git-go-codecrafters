@@ -16,13 +16,13 @@ func getDirAndFilePathFromHash(sha_hash string) (string, string) {
 }
 
 // returns 40 character hex SHA and 20 byte SHA given the content
-func writeContentAndGetShaHexAndBytes(content string) (string, [20]byte) {
+func getShaHexAndBytesForContent(content string) (string, [20]byte) {
 	sha_bytes := sha1.Sum([]byte(content))
 	sha_hex := fmt.Sprintf("%x", sha_bytes)
 	return sha_hex, sha_bytes
 }
 
-// writes content after zlib compression into .git directory in directory sha[:2] and filename sha[2:]
+// writes content after zlib compression into .git/objects directory in directory sha[:2] and filename sha[2:]
 func compressAndWriteGitObject(content string, sha_hash string) error {
 	directory_path, object_path := getDirAndFilePathFromHash(sha_hash)
 

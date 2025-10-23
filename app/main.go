@@ -27,12 +27,14 @@ func main() {
 		for _, dir := range []string{".git", ".git/objects", ".git/refs"} {
 			if err := os.MkdirAll(dir, 0755); err != nil {
 				fmt.Fprintf(os.Stderr, "Error creating directory: %s\n", err)
+				os.Exit(1)
 			}
 		}
 
 		headFileContents := []byte("ref: refs/heads/main\n")
 		if err := os.WriteFile(".git/HEAD", headFileContents, 0644); err != nil {
 			fmt.Fprintf(os.Stderr, "Error writing file: %s\n", err)
+			os.Exit(1)
 		}
 
 		fmt.Println("Initialized git directory")
@@ -41,7 +43,8 @@ func main() {
 		// git cat-file -p <hash>
 		content, err := CatFile(os.Args[3])
 		if err != nil {
-			fmt.Fprint(os.Stderr, err.Error())
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
 		}
 		fmt.Print(content)
 
@@ -58,7 +61,8 @@ func main() {
 
 		hash, _, err := HashObject(filename, write_flag)
 		if err != nil {
-			fmt.Fprint(os.Stderr, err.Error())
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
 		}
 		fmt.Println(hash)
 
@@ -76,7 +80,8 @@ func main() {
 
 		content, err := LsTree(tree_hash, is_name_only)
 		if err != nil {
-			fmt.Fprint(os.Stderr, err.Error())
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
 		}
 		fmt.Print(content) // newline already added within implementation
 
@@ -84,7 +89,56 @@ func main() {
 		// git write-tree
 		hash, _, err := WriteTree(".")
 		if err != nil {
-			fmt.Fprint(os.Stderr, err.Error())
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		fmt.Println(hash)
+
+	case "commit-tree":
+		// git commit-tree <tree_hash> -p <parent_hash> -m <message>
+		parent_hash := ""
+		commit_message := ""
+
+		if len(os.Args) < 3 {
+			fmt.Fprintln(os.Stderr, "Invalid number of arguments. Usage: git commit-tree <tree_hash> [options -m -p]")
+			os.Exit(1)
+		}
+		tree_hash := os.Args[2]
+
+		switch os.Args[3] {
+		case "-p":
+			if len(os.Args) < 5 {
+				fmt.Fprintln(os.Stderr, "Missing parent hash after -p")
+				os.Exit(1)
+			}
+			parent_hash = os.Args[4]
+		case "-m":
+			if len(os.Args) < 5 {
+				fmt.Fprintln(os.Stderr, "Missing commit message after -m")
+				os.Exit(1)
+			}
+			commit_message = os.Args[4]
+		}
+
+		switch os.Args[5] {
+		case "-p":
+			if len(os.Args) < 7 {
+				fmt.Fprintf(os.Stderr, "Missing parent hash after -p")
+				os.Exit(1)
+			}
+			parent_hash = os.Args[6]
+		case "-m":
+			if len(os.Args) < 7 {
+				fmt.Fprintf(os.Stderr, "Missing commit message after -m")
+				os.Exit(1)
+			}
+			commit_message = os.Args[6]
+		}
+
+		hash, err := CommitTree(tree_hash, parent_hash, commit_message)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
 		}
 		fmt.Println(hash)
 

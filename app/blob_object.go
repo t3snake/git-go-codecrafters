@@ -51,7 +51,7 @@ func HashObject(filename string, write_flag bool) (string, [20]byte, error) {
 
 	blob := generateBlobObject(string(file_content))
 
-	sha_hex, sha_byte := writeContentAndGetShaHexAndBytes(blob)
+	sha_hex, sha_byte := getShaHexAndBytesForContent(blob)
 
 	if write_flag {
 		err = compressAndWriteGitObject(blob, sha_hex)
