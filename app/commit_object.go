@@ -19,7 +19,7 @@ func CommitTree(tree_hash, parent_hash, commit_message string) (string, error) {
 	author_line := fmt.Sprintf("author %s <%s> %d %s\n", "t3snake", "t3snake@gmail.com", timestamp, timezone)
 	committer_line := fmt.Sprintf("committer %s <%s> %d %s\n", "t3snake", "t3snake@gmail.com", timestamp, timezone)
 
-	body := fmt.Sprintf("%s%s%s%s\n%s", tree_line, parent_line, author_line, committer_line, commit_message)
+	body := fmt.Sprintf("%s%s%s%s\n%s\n", tree_line, parent_line, author_line, committer_line, commit_message)
 	header := fmt.Sprintf("commit %d%s", len(body), NullChar)
 	content := fmt.Sprintf("%s%s", header, body)
 
